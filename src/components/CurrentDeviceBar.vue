@@ -12,7 +12,7 @@ function goDevice() {
 </script>
 
 <template>
-  <div @click="goDevice">
+  <div v-if="cameraStore.camera()" @click="goDevice">
     <span class="ml-10 ">
       {{ cameraStore.camera().name }}
     </span>

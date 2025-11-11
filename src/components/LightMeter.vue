@@ -17,6 +17,7 @@ const max = ref(4.0)
 const updateSpeedo = ref(true)
 const segments = ref(4)
 const state = ref('')
+let currentJobId = ''
 
 const rangeByPGA = {
   // note also dependent on VINNEG as the centre point
@@ -32,7 +33,7 @@ onBeforeMount(async () => {
 })
 onUnmounted(async () => {
   // in case user leaves the page during a run
-  onStopMeter()
+  onStopMeter(currentJobId)
 })
 
 async function onClickStart() {
@@ -40,16 +41,18 @@ async function onClickStart() {
   // listen to changes
   onStartMeter(jobId)
 }
-async function onStartMeter(jobId) {
+async function onStartMeter(jobId:string) {
   updateSpeedo.value = false
   // Subscribe to realtime changes to the recordId
   await pb.collection('cameras').subscribe(cameraStore.cameraId, getCamera, {})
   await pb.collection('jobs').subscribe(jobId, ()=>getJob(jobId), {})
+  currentJobId = jobId
 }
-async function onStopMeter(jobId) {
+async function onStopMeter(jobId:string) {
   // Unsubscribe from all registered subscriptions to the recordId
   await pb.collection('cameras').unsubscribe(cameraStore.cameraId)
-  await pb.collection('jobs').unsubscribe(jobId)
+  if(jobId) await pb.collection('jobs').unsubscribe(jobId)
+  currentJobId = null
 }
 async function getCamera() {
   try {
@@ -66,7 +69,7 @@ async function getCamera() {
     console.log('Meter - Get camera', { error })
   }
 }
-async function getJob(jobId) {
+async function getJob(jobId:string) {
   try {
     const j = await pb?.collection('jobs').getOne(jobId, {})
     if (j) {
@@ -82,11 +85,11 @@ async function getJob(jobId) {
 // force-render itself isn't dynamic, so this must be done once on page load
 // Note: the force-render prop is required to update the speedo config, but this makes the needle flick back to 0 so it's unusable!
 function configureSpeedo() {
-  console.log(`-${rangeByPGA[cam.value.ADC_PGA].range / 2} + ${cam.value.ADC_VINNEG}`)
-  console.log(`+${rangeByPGA[cam.value.ADC_PGA].range / 2} + ${cam.value.ADC_VINNEG}`)
+  // console.log(`-${rangeByPGA[cam.value.ADC_PGA].range / 2} + ${cam.value.ADC_VINNEG}`)
+  // console.log(`+${rangeByPGA[cam.value.ADC_PGA].range / 2} + ${cam.value.ADC_VINNEG}`)
   min.value = cam.value.ADC_VINNEG - rangeByPGA[cam.value.ADC_PGA].range / 2
   max.value = cam.value.ADC_VINNEG + rangeByPGA[cam.value.ADC_PGA].range / 2
-  console.log(`${min.value} -> ${max.value}`)
+  // console.log(`${min.value} -> ${max.value}`)
   segments.value = Math.ceil(max.value - min.value)
   updateSpeedo.value = false
 }

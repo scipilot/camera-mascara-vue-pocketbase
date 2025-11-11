@@ -24,10 +24,11 @@
     "pocketbase": "^0.26.3",
     "vue": "^3.5.22",
     "vue-router": "^4.6.3",
-    "vuetify": "^3.10.9",
-    "vue-speedometer": "^3.0.1"
+    "vue-speedometer": "^3.0.1",
+    "vuetify": "^3.10.9"
   },
   "devDependencies": {
+    "@mdi/font": "^7.4.47",
     "@nightwatch/vue": "^3.1.2",
     "@tsconfig/node22": "^22.0.2",
     "@types/node": "^22.18.11",

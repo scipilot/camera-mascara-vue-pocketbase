@@ -15,5 +15,9 @@ export const useCameraStore = defineStore("camera", () => {
     return cameras.value.find((c) => c.id == cameraId.value)
   }
 
-  return { cameraId, camera, cameras, clear }
+  function updateCameras(list){
+    cameras.value = list
+  }
+
+  return { cameraId, camera, cameras, updateCameras, clear }
 })

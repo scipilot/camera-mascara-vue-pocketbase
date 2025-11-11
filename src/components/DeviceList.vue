@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import {onMounted, onUnmounted, ref} from 'vue'
+import {onMounted, onUnmounted} from 'vue'
 import {useCameraStore} from '@/use/camera'
 import pb from '@/lib/pocketbase'
-
-// Events
-const emit = defineEmits(["cameraChosen", "camerasLoaded"]);
 
 // State
 const cameraStore = useCameraStore()
@@ -16,8 +13,7 @@ const getCamerasList = async () => {
 			'expand': 'job',
 		});
 		if (list) {
-			cameraStore.cameras = list;
-			emit("camerasLoaded");
+			cameraStore.updateCameras(list)
 		}
 	}
 	catch (error) {
@@ -27,7 +23,7 @@ const getCamerasList = async () => {
 
 const subscribeToAll = async () => {
 	await pb.realtime.subscribe("cameras", async function (e) {
-		await getCamerasList();
+		await getCamerasList()
 	});
 };
 const unsubscribeToAll = async () => {
@@ -35,20 +31,17 @@ const unsubscribeToAll = async () => {
 };
 
 onMounted(async () => {
-	await getCamerasList();
-	await subscribeToAll();
-});
+	await getCamerasList()
+	await subscribeToAll()
+})
 onUnmounted(async () => {
-	await unsubscribeToAll();
-});
+	await unsubscribeToAll()
+})
 
-const onClickCam = () => {
-	emit("cameraChosen"); // todo can't they watch the store?
-}
 </script>
 
 <template>
-	<v-select v-model="cameraStore.cameraId" @change="onClickCam"
+	<v-select v-model="cameraStore.cameraId"
 	          :items="cameraStore.cameras"
             item-title="name"
             item-value="id"
