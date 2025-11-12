@@ -1,57 +1,69 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useUserStore } from '@/use/user'
 import { useCameraStore } from '@/use/camera'
+import { useJobStore } from '@/use/job'
+import { createJob } from '@/lib/pocketbase/job.ts'
+import { subscribeDevice, unsubscribeDevice } from '@/lib/pocketbase/device.ts'
 import ADCParameterExplanation from '@/components/ADCParameterExplanation.vue'
-import pb from '@/lib/pocketbase'
+import JobStateChip from '@/components/JobStateChip.vue'
 
 // Compose
 const cameraStore = useCameraStore()
 const userStore = useUserStore()
+const jobStore = useJobStore()
 
 // State
 const cam = ref({ brightness: 0 })
+const loading = ref(false)
 
 // Events
-// const emit = defineEmits(["newJobCreated"]);
 onMounted(async () => {
   cam.value = cameraStore.camera()
 })
 
+onUnmounted(async () => {
+  await unsubscribeDevice(cameraStore.cameraId)
+})
 // Methods
-const createJob = async () => {
-  try {
-    const payload = {
-      job: 'adc.config.read',
-      state: 'requested',
-      camera: cameraStore.cameraId,
-      user: userStore.userID,
-      userdata: userStore.userProfileID,
-    }
-    const response = await pb.collection('jobs').create(payload)
-    if (response) {
-      // emit("newJobCreated");
-    }
-  } catch (error) {
-    console.log(error)
-  }
+async function doCreateJob() {
+  loading.value = true
+  // This performs the job, and updates the job-store with the job states
+  await createJob('adc.config.read', userStore.userID, userStore.userProfileID, cameraStore.cameraId,{}, setJobWrapper)
+  await subscribeDevice(cameraStore.cameraId, setCameraWrapper)
 }
+
+function setJobWrapper(j){
+  // console.log("setJobWrapper", {j})
+  jobStore.setJob(j)
+  if(!j) loading.value = false
+}
+function setCameraWrapper(cam){
+  // console.log("setCameraWrapper", {cam})
+  cameraStore.setCamera(cam)
+  cam.value = cam
+}
+
 </script>
 
 <template>
   <v-card class="my-5">
-    <v-card-title>Query the device for the configuration (read from ADC chip)</v-card-title>
+    <v-card-title>Query the device configuration</v-card-title>
     <v-card-text>
-      <form @submit.prevent="createJob">
-        <v-btn type="submit" color="primary">
-          GO
-        </v-btn>
+      <form @submit.prevent="doCreateJob">
+        <v-btn type="submit" color="primary" :loading="loading"> GO </v-btn>
       </form>
+      <p>
+        You only need to read the settings from the device if you have swapped the device or programmed its settings directly somehow.
+        This will synchronise this app with the settings on the device.
+      </p>
     </v-card-text>
   </v-card>
 
+  <JobStateChip />
+
   <v-card class="my-5">
-    <v-card-title> Current Config </v-card-title>
+    <v-card-title> Current Configuration </v-card-title>
     <v-card-text>
       <p>Digital Gain: {{ cam.ADC_PGA }},</p>
       <p>Samples per second: {{ cam.ADC_SPS }},</p>

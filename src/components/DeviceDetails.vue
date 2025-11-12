@@ -35,5 +35,10 @@ const cameraStore = useCameraStore()
 			)
 		</p>
     </v-card-text>
+    <v-card-actions>
+
+      <v-btn to="/device/query"> Query device... </v-btn>
+      <v-btn to="/device/write"> Update device... </v-btn>
+    </v-card-actions>
 </v-card>
 </template>

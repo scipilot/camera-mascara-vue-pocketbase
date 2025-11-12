@@ -6,6 +6,7 @@ import MeterView from '@/views/MeterView.vue'
 import DeviceView from '@/views/DeviceView.vue'
 import DeviceQueryView from '@/views/DeviceQueryView.vue'
 import DeviceWriteView from '@/views/DeviceWriteView.vue'
+import pb from '@/lib/pocketbase'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -53,6 +54,12 @@ const router = createRouter({
     },
 
   ],
+})
+
+router.beforeEach((to, from) => {
+  if (to.meta.private && !pb.authStore.token) {
+    return { path: "/" }
+  }
 })
 
 export default router

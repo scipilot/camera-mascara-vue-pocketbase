@@ -1,47 +1,61 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 import { useUserStore } from '@/use/user'
 import { useCameraStore } from '@/use/camera'
 import ADCParameterExplanation from '@/components/ADCParameterExplanation.vue'
-import pb from '@/lib/pocketbase'
+import { createJob } from '@/lib/pocketbase/job.ts'
+import { useJobStore } from '@/use/job.ts'
+import { subscribeDevice, unsubscribeDevice } from '@/lib/pocketbase/device.ts'
 
 // Compose
 const cameraStore = useCameraStore()
 const userStore = useUserStore()
+const jobStore = useJobStore()
 
 // State
-// const title = ref("");
 const cam = ref({ brightness: 0 })
 const pga = ref(0)
 const sps = ref(0)
+const loading = ref(false)
 
 // Events
-// const emit = defineEmits(["newJobCreated"]);
 onMounted(async () => {
   cam.value = cameraStore.camera()
   pga.value = cam.value.ADC_PGA
   sps.value = cam.value.ADC_SPS
 })
+onUnmounted(async () => {
+  await unsubscribeDevice(cameraStore.cameraId)
+})
 
 // Methods
-const createJob = async () => {
-  try {
-    const payload = {
-      job: 'adc.config.write',
-      state: 'requested',
-      camera: cameraStore.cameraId,
-      pga: pga.value,
-      sps: sps.value,
-      user: userStore.userID,
-      userdata: userStore.userProfileID,
-    }
-    const response = await pb.collection('jobs').create(payload)
-    if (response) {
-      // emit("newJobCreated");
-    }
-  } catch (error) {
-    console.log(error)
+async function doCreateJob() {
+  loading.value = true
+  const payload = {
+    pga: pga.value,
+    sps: sps.value,
   }
+
+  // This performs the job, and updates the job-store with the job states
+  await createJob(
+    'adc.config.write',
+    userStore.userID,
+    userStore.userProfileID,
+    cameraStore.cameraId,
+    payload,
+    setJobWrapper,
+  )
+  await subscribeDevice(cameraStore.cameraId, setCameraWrapper)
+}
+function setJobWrapper(j) {
+  // console.log("setJobWrapper", {j})
+  jobStore.setJob(j)
+  if (!j) loading.value = false
+}
+function setCameraWrapper(cam) {
+  // console.log("setCameraWrapper", {cam})
+  cameraStore.setCamera(cam)
+  cam.value = cam
 }
 </script>
 
@@ -49,9 +63,8 @@ const createJob = async () => {
   <v-card>
     <v-card-title>Update the device configuration (write to ADC chip)</v-card-title>
     <v-card-text>
-      <form @submit.prevent="createJob">
-
-            <p>Set your desired settings</p>
+      <form @submit.prevent="doCreateJob">
+        <p>Set your desired settings</p>
         <v-container>
           <v-row>
             <v-col cols="5">
@@ -65,25 +78,21 @@ const createJob = async () => {
             </v-col>
           </v-row>
           <v-row>
-            <v-col cols="5">
-            Samples per second: (currently {{ cam.ADC_SPS }})
-            </v-col>
+            <v-col cols="5"> Samples per second: (currently {{ cam.ADC_SPS }}) </v-col>
             <v-col>
-            <label class="mr-5"> <input type="radio" v-model="sps" value="15" /> 15 </label>
-            <label class="mr-5"> <input type="radio" v-model="sps" value="30" /> 30 </label>
-            <label class="mr-5"> <input type="radio" v-model="sps" value="60" /> 60 </label>
-            <label class="mr-5"> <input type="radio" v-model="sps" value="240" /> 240 </label>
+              <label class="mr-5"> <input type="radio" v-model="sps" value="15" /> 15 </label>
+              <label class="mr-5"> <input type="radio" v-model="sps" value="30" /> 30 </label>
+              <label class="mr-5"> <input type="radio" v-model="sps" value="60" /> 60 </label>
+              <label class="mr-5"> <input type="radio" v-model="sps" value="240" /> 240 </label>
             </v-col>
           </v-row>
           <v-row>
             <v-col>
-            <p>Black Offset: {{ cam.ADC_VINNEG }}</p>
+              <p>Black Offset: {{ cam.ADC_VINNEG }}</p>
             </v-col>
           </v-row>
         </v-container>
-        <v-btn type="submit" color="primary">
-          GO
-        </v-btn>
+        <v-btn type="submit" color="primary" :loading="loading"> GO </v-btn>
       </form>
     </v-card-text>
   </v-card>

@@ -19,5 +19,11 @@ export const useCameraStore = defineStore("camera", () => {
     cameras.value = list
   }
 
-  return { cameraId, camera, cameras, updateCameras, clear }
+  // interesting - if we update the "current camera" this needs to be spliced into the existing list
+  function setCamera(nc){
+    console.log('useCamera.setCamera', { nc })
+    cameras.value.splice(cameras.value.findIndex(c => c.id == cameraId.value), 1, nc)
+  }
+
+  return { cameraId, camera, cameras, updateCameras, setCamera, clear }
 })
