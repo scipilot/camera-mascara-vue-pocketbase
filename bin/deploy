@@ -1,0 +1,16 @@
+#!/bin/sh
+
+# deploys the static site to the Raspberry pi
+# Assumes: hosting in Pocketbase, host is raspberrypi.local, and ssh has a local login key stored.
+# Validate inputs .................................................................................
+usage() { echo '  usage:\n    bin/deploy PI_USER \n  e.g:\n    bin/deploy pi' ; }
+
+PI_USER=$1
+if [ -z "$PI_USER" ]
+then
+	echo "Please provide PI_USER (e.g. pi)"
+	usage
+	exit 1
+fi
+npm run build
+rsync -avz -e ssh ./dist/* $PI_USER@raspberrypi.local:/usr/local/pocketbase/pb_public

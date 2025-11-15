@@ -19,7 +19,7 @@ function goDevice() {
     (
     <span v-if="!cameraStore.camera().job">idle</span>
     <span v-else>
-      {{ cameraStore.camera().job }} -
+<!--      {{ cameraStore.camera().job }} - -->
       {{ cameraStore.camera().expand?.job.job }} -
       {{ cameraStore.camera().expand?.job.state }}
     </span>
