@@ -21,6 +21,26 @@ const overlay = ref(false)
              @click="overlay = !overlay"
       />
     <p>{{ props.imageData?.stats }}</p>
+
+  <p v-if="props.imageData?.clip == 'hi'"  prepend-icon="mdi-alert">
+      <v-chip color="red" size="large" >
+        Brightness level went above maximum!
+      </v-chip>
+        Perhaps turn down the gain or reduce projector brightness/contrast to avoid image saturation.
+  </p>
+  <p v-if="props.imageData?.clip == 'lo'" >
+      <v-chip color="red" size="large" prepend-icon="mdi-alert">
+        Brightness level went below minimum!
+      </v-chip>
+        Perhaps turn up the gain to see darkness, or increase black-level brightness.
+  </p>
+  <p v-if="props.imageData?.clip == 'both'" >
+      <v-chip color="red" size="large"  prepend-icon="mdi-alert">
+        Brightness level went beyond both top and bottom range!
+      </v-chip>
+        Perhaps turn down the gain and increase black-level brightness.
+  </p>
+
     </v-card-text>
   </v-card>
 
