@@ -18,14 +18,14 @@ const emit = defineEmits(['JobCreated'])
 // State
 const title = ref('')
 // the radios need string values
-const mask_type = ref('pixel')
+const mask_type = ref('point')
 const image_size = ref('64')
 const mask_pixel_size = ref('2')
 const loading = ref(false)
 
 const pixelSizes = [4, 16, 32, 64, 128]
 const fourierSizes = [32, 64, 128]
-const image_sizes = ref(computed(()  => (mask_type.value == 'pixel') ? pixelSizes : fourierSizes))
+const image_sizes = ref(computed(()  => (mask_type.value == 'point') ? pixelSizes : fourierSizes))
 
 const availableCombinations = {
   '4': [1],
@@ -89,12 +89,12 @@ function setJobWrapper(j) {
             </v-radio-group>
           </div>
           <div>
-            <p :class="mask_type=='pixel' ?'': 'text-grey-darken-2'" >Mask Pixel Size</p>
-            <v-radio-group v-model="mask_pixel_size" inline :disabled="!(mask_type=='pixel')">
-              <v-radio value="1" label="1" :disabled="!available(image_size, 1) || !(mask_type=='pixel')" />
-              <v-radio value="2" label="2" :disabled="!available(image_size, 2) || !(mask_type=='pixel')" />
-              <v-radio value="4" label="4" :disabled="!available(image_size, 4) || !(mask_type=='pixel')" />
-              <v-radio value="8" label="8" :disabled="!available(image_size, 8) || !(mask_type=='pixel')" />
+            <p :class="mask_type=='point' ? '': 'text-grey-darken-2'" >Mask Pixel Size</p>
+            <v-radio-group v-model="mask_pixel_size" inline :disabled="!(mask_type=='point')">
+              <v-radio value="1" label="1" :disabled="!available(image_size, 1) || !(mask_type=='point')" />
+              <v-radio value="2" label="2" :disabled="!available(image_size, 2) || !(mask_type=='point')" />
+              <v-radio value="4" label="4" :disabled="!available(image_size, 4) || !(mask_type=='point')" />
+              <v-radio value="8" label="8" :disabled="!available(image_size, 8) || !(mask_type=='point')" />
             </v-radio-group>
           </div>
           <label>

@@ -2,9 +2,8 @@
 
 This is a simple front-end for the "Camera Mascara" (mark 2), a Raspberry Pi Hat single-pixel masked camera, inspired by the work by Jon Bumstead of Okooptics [instructables](https://www.instructables.com/Non-line-of-sight-Imaging-With-a-Photoresistor-and/) [YouTube](https://www.youtube.com/watch?v=dMH6VUs5u8k). 
 
-Also see the server-side project to be installed on the Pi here: https://github.com/scipilot/camera-mascara 
-
-Also see the related Pi Hat hardware design Kicad project here: TBC
+- See the server-side project to be installed on the Pi here: https://github.com/scipilot/camera-mascara
+- See the related Pi Hat hardware design Kicad project here: https://github.com/scipilot/camera-mascara-jzh
 
 
 This small web app allows you to "take photos" with the Pi Hat while varying some parameters without having to SSH in, edit and run the code on the Pi. It makes the "camera" into a more usable device - the web app is easily hosted inside the Pi itself so the whole thing is self-contained. (If you are making changes, the web app can be run on a developer machine on the same local network, as it will use the same API.)

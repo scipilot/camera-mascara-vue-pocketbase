@@ -141,6 +141,13 @@ async function createJob() {
 -->
         <VueSpeedometer :value="level" :min-value="min" :max-value="max" :segments="segments" />
 
+        <v-chip v-if="cam.clip == 'hi'" color="red" size="large" >
+          Brightness is out of range - clipped high! Turn down the gain.
+        </v-chip>
+        <v-chip v-if="cam.clip == 'lo'" color="red" size="large" >
+          Brightness is out of range - clipped low! Turn up the gain.
+        </v-chip>
+
         <p v-if="!cam.job">
           <v-btn color="primary" @click="onClickStart"> START METER</v-btn> (for 30 seconds)
         </p>
