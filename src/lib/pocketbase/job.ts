@@ -40,9 +40,9 @@ async function getJob(jobId: string, setJob: Function) {
       console.log('Job.getJob got', { j })
       if (j.state == 'ended') {
         await unsubscribe(jobId)
-        setJob(null)
+        await setJob(null)
       }
-      else setJob(j)
+      else await setJob(j)
     }
   } catch (error) {
     console.error('Job.getJob caught', { jobId, error })

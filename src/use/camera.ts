@@ -22,7 +22,9 @@ export const useCameraStore = defineStore("camera", () => {
   // interesting - if we update the "current camera" this needs to be spliced into the existing list
   function setCamera(nc){
     console.log('useCamera.setCamera', { nc })
-    cameras.value.splice(cameras.value.findIndex(c => c.id == cameraId.value), 1, nc)
+    // TODO GETTING ERROR HERE:  camera.ts:26 TypeError: Converting circular structure to JSON
+    const i = cameras.value.findIndex(c => c.id == cameraId.value)
+    cameras.value.splice(i, 1, nc)
   }
 
   return { cameraId, camera, cameras, updateCameras, setCamera, clear }

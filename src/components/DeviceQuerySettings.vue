@@ -33,12 +33,15 @@ async function doCreateJob() {
   await subscribeDevice(cameraStore.cameraId, setCameraWrapper)
 }
 
-function setJobWrapper(j){
+async function setJobWrapper(j){
   // console.log("setJobWrapper", {j})
   jobStore.setJob(j)
-  if(!j) loading.value = false
+  if(!j) {
+    loading.value = false
+    await unsubscribeDevice(cameraStore.cameraId)
+  }
 }
-function setCameraWrapper(cam){
+async function setCameraWrapper(cam){
   // console.log("setCameraWrapper", {cam})
   cameraStore.setCamera(cam)
   cam.value = cam

@@ -14,6 +14,7 @@ export const useJobStore = defineStore("job", () => {
   function setJob(j){
     console.log('useJob.setJob', { j })
     job.value = j
+    //jobId.value = j.id
   }
 
   return { jobId, job, setJob, clear }

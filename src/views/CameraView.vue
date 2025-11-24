@@ -33,7 +33,7 @@ onMounted(() => {
     <div>
         <h1 >Camera</h1>
         <div v-if="jobs" >
-            <StartScan @new-post-created="getOwnedJobList" />
+            <StartScan  />
         </div>
     </div>
 </template>

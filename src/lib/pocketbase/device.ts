@@ -21,7 +21,7 @@ async function getCamera(deviceId:string, setDevice:Function) {
       expand: 'job',
     })
     if (c) {
-      setDevice(c)
+      await setDevice(c)
 
       // TODO I wondered if there could be a job related extension to this? (i.e. sub-during-job) or keep that separate in the caller?
       // NOTE API (pocketbase-subscriber.py) removes the "job" from the "camera" when it has ended, so we won't ever see the expanded job having "ended" state
