@@ -3,9 +3,10 @@ import { onMounted, onUnmounted, ref } from "vue"
 import Image from "@/components/Image.vue"
 import pb from '@/lib/pocketbase'
 import GalleryImage from '@/components/GalleryImage.vue'
+import type { ImageDTO } from '@/lib/types/image.ts'
 
 // Local reactive variables
-const images = ref<any[]>([])
+const images = ref<ImageDTO[]>([])
 const layout = ref('1')
 
 const getList = async () => {
@@ -17,7 +18,7 @@ const getList = async () => {
       images.value = list;
     }
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 
@@ -39,6 +40,10 @@ onMounted(async () => {
 onUnmounted(async () => {
   await unsubscribe();
 });
+
+async function onDeleteImage(id: string) {
+  await pb.collection("images").delete(id);
+}
 </script>
 
 <template>
@@ -59,7 +64,7 @@ onUnmounted(async () => {
         v-for="image in images"
         v-bind:key="image.id"
       >
-        <Image :image-data="image" />
+        <Image :image-data="image" @delete-image="onDeleteImage"/>
       </div>
     </div>
     <v-container v-if="layout == 1 && images" >

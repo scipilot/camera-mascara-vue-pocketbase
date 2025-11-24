@@ -1,10 +1,11 @@
 import { ref } from "vue"
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
+import type { Camera } from '@/lib/types/camera.ts'
 
 export const useCameraStore = defineStore("camera", () => {
   const cameraId = ref(useLocalStorage("cameraId", ""))
-  const cameras = ref(useLocalStorage("cameras", []))
+  const cameras = ref<Camera[]>(useLocalStorage("cameras", []))
 
   function clear() {
     cameraId.value = ""
@@ -12,19 +13,19 @@ export const useCameraStore = defineStore("camera", () => {
   }
 
   function camera() {
-    return cameras.value.find((c) => c.id == cameraId.value)
+    return cameras.value.find((c:Camera) => c.id == cameraId.value)
   }
 
-  function updateCameras(list){
+  function updateCameras(list:Camera[]) {
     cameras.value = list
   }
 
-  // interesting - if we update the "current camera" this needs to be spliced into the existing list
-  function setCamera(nc){
-    console.log('useCamera.setCamera', { nc })
-    // TODO GETTING ERROR HERE:  camera.ts:26 TypeError: Converting circular structure to JSON
-    const i = cameras.value.findIndex(c => c.id == cameraId.value)
-    cameras.value.splice(i, 1, nc)
+  // If we update the "current camera" it needs to be spliced into the existing list
+  function setCamera(nc:Camera){
+    // console.log('useCamera.setCamera', { nc })
+    const i = cameras.value.findIndex((c:Camera) => c.id == cameraId.value)
+    // cameras.value.splice(i, 1, nc)
+    cameras.value[i] = nc
   }
 
   return { cameraId, camera, cameras, updateCameras, setCamera, clear }

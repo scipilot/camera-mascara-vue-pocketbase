@@ -19,7 +19,7 @@ export const createJob = async (jobName: string, userID: string, userProfileID: 
       await subscribe(response.id, setJob)
     }
   } catch (error) {
-    console.log('Job.createJob caught', { userID, deviceId, jobName, error })
+    console.error('Job.createJob caught', { userID, deviceId, jobName, error })
   }
 }
 
@@ -33,11 +33,11 @@ async function unsubscribe(jobId: string) {
 }
 
 async function getJob(jobId: string, setJob: Function) {
-  console.log('Job.getJob', { jobId })
+  // console.log('Job.getJob', { jobId })
   try {
     const j = await pb?.collection('jobs').getOne(jobId, {})
     if (j) {
-      console.log('Job.getJob got', { j })
+      // console.log('Job.getJob got', { j })
       if (j.state == 'ended') {
         await unsubscribe(jobId)
         await setJob(null)

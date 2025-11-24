@@ -1,4 +1,5 @@
 import pb from '@/lib/pocketbase/index.ts'
+import { makeCamera } from '@/lib/types/camera.ts'
 
 
 // Handles listening to a device and tracking its progress in the provided store until told to stop (unsubscribeDevice)
@@ -15,13 +16,14 @@ export const unsubscribeDevice = async (deviceId:string) => {
 }
 
 async function getCamera(deviceId:string, setDevice:Function) {
-  console.log('Device.getCamera')
+  // console.log('Device.getCamera')
   try {
     const c = await pb.collection('cameras').getOne(deviceId, {
       expand: 'job',
     })
     if (c) {
-      await setDevice(c)
+      // console.log('get camera received camera', { c, deviceId })
+      await setDevice(makeCamera(c))
 
       // TODO I wondered if there could be a job related extension to this? (i.e. sub-during-job) or keep that separate in the caller?
       // NOTE API (pocketbase-subscriber.py) removes the "job" from the "camera" when it has ended, so we won't ever see the expanded job having "ended" state
@@ -34,6 +36,6 @@ async function getCamera(deviceId:string, setDevice:Function) {
 
     }
   } catch (error) {
-    console.log('Device.GetCamera caught', { error })
+    console.error('Device.GetCamera caught', { error })
   }
 }

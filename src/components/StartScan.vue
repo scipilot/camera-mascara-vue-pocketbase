@@ -6,6 +6,8 @@ import { useJobStore } from '@/use/job.ts'
 import { createJob } from '@/lib/pocketbase/job.ts'
 import CurrentJobPanel from '@/components/CurrentJobPanel.vue'
 import { subscribeDevice, unsubscribeDevice } from '@/lib/pocketbase/device.ts'
+import type { CameraDTO } from '@/lib/types/camera.ts'
+import type { JobDTO } from '@/lib/types/job.ts'
 
 // Compose
 const userStore = useUserStore()
@@ -28,11 +30,11 @@ const fourierSizes = ["32", "64", "128"]
 const image_sizes = ref(computed(() => (mask_type.value == 'point' ? pixelSizes : fourierSizes)))
 
 const availableCombinations = {
-  '4': [1],
-  '16': [2],
-  '32': [2, 4],
-  '64': [2, 4, 8],
-  '128': [4, 8],
+  "4":   ["1"],
+  "16":  ["2"],
+  "32":  ["2", "4"],
+  "64":  ["2", "4", "8"],
+  "128": ["4", "8"],
 }
 
 // Events
@@ -65,18 +67,17 @@ async function doCreateJob() {
   )
   await subscribeDevice(cameraStore.cameraId, setCameraWrapper)
 }
-async function setJobWrapper(j) {
-  console.log('SS setJobWrapper', { j })
+async function setJobWrapper(j:JobDTO) {
+  // console.log('SS setJobWrapper', { j })
   jobStore.setJob(j)
   if (!j) {
     loading.value = false
     await unsubscribeDevice(cameraStore.cameraId)
   }
 }
-function setCameraWrapper(cam) {
+function setCameraWrapper(cam:CameraDTO) {
   // console.log("setCameraWrapper", {cam})
   cameraStore.setCamera(cam)
-  cam.value = cam
 }
 </script>
 
@@ -110,22 +111,22 @@ function setCameraWrapper(cam) {
               <v-radio
                 value="1"
                 label="1"
-                :disabled="!available(image_size, 1) || !(mask_type == 'point')"
+                :disabled="!available(image_size, '1') || !(mask_type == 'point')"
               />
               <v-radio
                 value="2"
                 label="2"
-                :disabled="!available(image_size, 2) || !(mask_type == 'point')"
+                :disabled="!available(image_size, '2') || !(mask_type == 'point')"
               />
               <v-radio
                 value="4"
                 label="4"
-                :disabled="!available(image_size, 4) || !(mask_type == 'point')"
+                :disabled="!available(image_size, '4') || !(mask_type == 'point')"
               />
               <v-radio
                 value="8"
                 label="8"
-                :disabled="!available(image_size, 8) || !(mask_type == 'point')"
+                :disabled="!available(image_size, '8') || !(mask_type == 'point')"
               />
             </v-radio-group>
           </div>
