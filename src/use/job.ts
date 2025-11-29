@@ -1,4 +1,4 @@
-import { ref, Ref } from "vue"
+import { type Ref, ref } from 'vue'
 import { useLocalStorage } from "@vueuse/core"
 import { defineStore } from "pinia"
 import type { JobDTO } from '@/lib/types/job.ts'

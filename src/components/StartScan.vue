@@ -15,26 +15,39 @@ const cameraStore = useCameraStore()
 const jobStore = useJobStore()
 
 // Events
-const emit = defineEmits(['JobCreated'])
+// const emit = defineEmits(['JobCreated'])
 
 // State
 const title = ref('')
 // the radios need string values
 const mask_type = ref('point')
 const image_size = ref('64')
-const mask_pixel_size = ref('2')
+// const mask_pixel_scan = ref('32') // REMOVED not useful? - (scans a subsection/window of the image).
+const mask_point_size = ref('2')
+const mask_point_shape = ref('square')
 const loading = ref(false)
 
-const pixelSizes = ["4", "16", "32", "64", "128"]
-const fourierSizes = ["32", "64", "128"]
-const image_sizes = ref(computed(() => (mask_type.value == 'point' ? pixelSizes : fourierSizes)))
+const pointImageSizes = ["4", "16", "32", "64", "128", "256"]
+// const pixelScans = ["4", "16", "32", "64", "128"]
+const fourierImageSizes = ["32", "64", "128"]
+const image_sizes = ref(computed(() => (mask_type.value == 'point' ? pointImageSizes : fourierImageSizes)))
+const point_sizes = ref(computed(() => (mask_point_shape.value == 'square' ? pointSizesSquare : pointSizesGaussian)))
 
-const availableCombinations = {
+const pointSizesSquare = ["1", "2", "4", "8"]
+const pointSizeCombosSquare = {
   "4":   ["1"],
   "16":  ["2"],
   "32":  ["2", "4"],
   "64":  ["2", "4", "8"],
   "128": ["4", "8"],
+}
+const pointSizesGaussian = ["3", "5", "9", "15", "33", "49", "99"]
+const pointSizeCombosGaussian = {
+  "16":  ["3", "5"],
+  "32":  ["3", "5", "9", "15"],
+  "64":  ["9", "15", "33"],
+  "128": ["9", "15", "33", "65"],
+  "256": ["15", "33"],
 }
 
 // Events
@@ -43,8 +56,9 @@ onUnmounted(async () => {
 })
 
 // Methods
-function available(image_size: string, mask_pixel_size: string) {
-  return availableCombinations[image_size].includes(mask_pixel_size)
+function available(image_size: string, mask_point_shape: string, mask_pixel_size: string) {
+  if(mask_point_shape == "square") return pointSizeCombosSquare[image_size].includes(mask_pixel_size)
+  if(mask_point_shape == "gaussian") return pointSizeCombosGaussian[image_size].includes(mask_pixel_size)
 }
 
 async function doCreateJob() {
@@ -53,7 +67,9 @@ async function doCreateJob() {
     title: title.value,
     mask_type: mask_type.value,
     image_size: image_size.value,
-    mask_pixel_size: mask_pixel_size.value,
+    mask_point_size: mask_point_size.value,
+    mask_point_shape: mask_point_shape.value,
+    // mask_pixel_scan: mask_pixel_scan.value,
   }
 
   // This performs the job, and updates the job-store with the job states
@@ -94,7 +110,7 @@ function setCameraWrapper(cam:CameraDTO) {
           <div>
             <p>Mask Type</p>
             <v-radio-group v-model="mask_type" inline>
-              <v-radio value="point" label="Single Pixel" />
+              <v-radio value="point" label="Point Scan" />
               <v-radio value="fourier" label="Fourier" />
               <v-radio value="hadamard" label="Hadamard" disabled />
             </v-radio-group>
@@ -105,28 +121,32 @@ function setCameraWrapper(cam:CameraDTO) {
               <v-radio v-for="size in image_sizes" :label="size" :value="size" v-bind:key="size" />
             </v-radio-group>
           </div>
+<!--
           <div>
-            <p :class="mask_type == 'point' ? '' : 'text-grey-darken-2'">Mask Pixel Size</p>
-            <v-radio-group v-model="mask_pixel_size" inline :disabled="!(mask_type == 'point')">
+            <p :class="mask_type == 'point' ? '' : 'text-grey-darken-2'">Mask Point scan resolution</p>
+            <v-radio-group v-model="mask_pixel_scan" inline :disabled="!(mask_type == 'point')">
+              <v-radio v-for="size in pixelScans" :label="size" :value="size" v-bind:key="size" />
+            </v-radio-group>
+          </div>
+-->
+          <div>
+            <p :class="mask_type == 'point' ? '' : 'text-grey-darken-2'">Mask Point Size</p>
+            <v-radio-group v-model="mask_point_size" inline :disabled="!(mask_type == 'point')">
+              <v-radio v-for="size in point_sizes" :key="size" :value="size" :label="size"
+                :disabled="!available(image_size, mask_point_shape, size) || !(mask_type == 'point')"
+              />
+            </v-radio-group>
+          </div>
+          <div>
+            <p :class="mask_type == 'point' ? '' : 'text-grey-darken-2'">Mask Point Shape</p>
+            <v-radio-group v-model="mask_point_shape" inline :disabled="!(mask_type == 'point')">
               <v-radio
-                value="1"
-                label="1"
-                :disabled="!available(image_size, '1') || !(mask_type == 'point')"
+                value="square"
+                label="Square"
               />
               <v-radio
-                value="2"
-                label="2"
-                :disabled="!available(image_size, '2') || !(mask_type == 'point')"
-              />
-              <v-radio
-                value="4"
-                label="4"
-                :disabled="!available(image_size, '4') || !(mask_type == 'point')"
-              />
-              <v-radio
-                value="8"
-                label="8"
-                :disabled="!available(image_size, '8') || !(mask_type == 'point')"
+                value="gaussian"
+                label="Gaussian"
               />
             </v-radio-group>
           </div>

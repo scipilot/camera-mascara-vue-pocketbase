@@ -5,7 +5,6 @@ import { useJobStore } from '@/use/job.ts'
 const jobStore = useJobStore()
 
 const state = computed(()=>{
-  console.log('JobChip.compute state', {job: jobStore.job, state:jobStore.job.state})
   if(jobStore.job) return jobStore.job.state
   else return null
 })
